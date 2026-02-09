@@ -1,0 +1,373 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- // CONFIGURATION //
+local UI_NAME = "JesterHub_Red"
+local THEME = {
+    Background = Color3.fromRGB(10, 10, 12),      -- Almost Black
+    Element    = Color3.fromRGB(20, 20, 20),      -- Dark Grey
+    Text       = Color3.fromRGB(255, 255, 255),   -- Pure White (High Contrast)
+    TextDim    = Color3.fromRGB(180, 180, 180),   -- Light Grey
+    RedBright  = Color3.fromRGB(255, 30, 30),     -- Neon Red
+    RedDark    = Color3.fromRGB(130, 0, 0),       -- Deep Blood Red
+    Success    = Color3.fromRGB(0, 255, 100),
+    Error      = Color3.fromRGB(255, 0, 0)
+}
+
+local ActiveFilters = {
+    ["Common"] = true, ["Rare"] = true, ["Epic"] = true, 
+    ["Legendary"] = true, ["Mythic"] = true, ["Godly"] = true,
+    ["Celestial"] = true, ["Secret"] = true
+}
+local SearchText = ""
+local UI_OPEN = true
+
+-- // CLEANUP //
+if LocalPlayer.PlayerGui:FindFirstChild(UI_NAME) then
+    LocalPlayer.PlayerGui[UI_NAME]:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+ScreenGui.Name = UI_NAME
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+
+-- // ANIMATED GRADIENT FUNCTION //
+local function AddAnimatedGradient(parent)
+    local g = Instance.new("UIGradient", parent)
+    g.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, THEME.RedDark),
+        ColorSequenceKeypoint.new(0.5, THEME.RedBright),
+        ColorSequenceKeypoint.new(1, THEME.RedDark)
+    }
+    g.Rotation = 45
+    
+    -- Infinite Tween for rotation
+    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1)
+    local tween = TweenService:Create(g, tweenInfo, {Rotation = 45 + 360})
+    tween:Play()
+    
+    return g
+end
+
+local function Tween(obj, props, time)
+    TweenService:Create(obj, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props):Play()
+end
+
+local function MakeDraggable(topbar, object)
+    local dragging, dragInput, dragStart, startPos
+    topbar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true; dragStart = input.Position; startPos = object.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            local delta = input.Position - dragStart
+            Tween(object, {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}, 0.05)
+        end
+    end)
+    topbar.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
+end
+
+-- // TOGGLE BUTTON (JH) //
+local ToggleFrame = Instance.new("Frame", ScreenGui)
+ToggleFrame.Size = UDim2.new(0, 60, 0, 60)
+ToggleFrame.Position = UDim2.new(0, 30, 0.5, -30)
+ToggleFrame.BackgroundColor3 = THEME.Background
+ToggleFrame.BorderSizePixel = 0
+Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(1, 0)
+
+-- Animated Gradient Border for Toggle
+local ToggleStroke = Instance.new("UIStroke", ToggleFrame)
+ToggleStroke.Thickness = 3
+ToggleStroke.Color = THEME.RedBright -- Fallback color
+AddAnimatedGradient(ToggleStroke)
+
+local ToggleBtn = Instance.new("TextButton", ToggleFrame)
+ToggleBtn.Size = UDim2.new(1, 0, 1, 0)
+ToggleBtn.BackgroundTransparency = 1
+ToggleBtn.Text = "JH"
+ToggleBtn.TextColor3 = THEME.Text
+ToggleBtn.Font = Enum.Font.GothamBlack
+ToggleBtn.TextSize = 24
+ToggleBtn.TextStrokeTransparency = 0 -- Black Outline on Text
+
+ToggleBtn.MouseEnter:Connect(function() Tween(ToggleFrame, {Size = UDim2.new(0, 65, 0, 65)}) end)
+ToggleBtn.MouseLeave:Connect(function() Tween(ToggleFrame, {Size = UDim2.new(0, 60, 0, 60)}) end)
+
+-- // MAIN WINDOW //
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 600, 0, 400)
+Main.Position = UDim2.new(0.5, -300, 0.5, -200)
+Main.BackgroundColor3 = THEME.Background
+Main.BorderSizePixel = 0
+Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+
+-- Border with Animated Gradient
+local MainStroke = Instance.new("UIStroke", Main)
+MainStroke.Thickness = 2
+AddAnimatedGradient(MainStroke)
+
+-- Top Bar
+local TopBar = Instance.new("Frame", Main)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+TopBar.BorderSizePixel = 0
+MakeDraggable(TopBar, Main)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Text = "JESTER HUB"
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 18
+Title.TextColor3 = THEME.RedBright
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close Button Logic
+ToggleBtn.MouseButton1Click:Connect(function()
+    UI_OPEN = not UI_OPEN
+    if UI_OPEN then
+        Main.Visible = true
+        Tween(Main, {Size = UDim2.new(0, 600, 0, 400)}, 0.4)
+    else
+        Tween(Main, {Size = UDim2.new(0, 600, 0, 0)}, 0.4)
+        wait(0.4)
+        if not UI_OPEN then Main.Visible = false end
+    end
+end)
+
+-- // LOGIN SCREEN //
+local LoginContainer = Instance.new("Frame", Main)
+LoginContainer.Size = UDim2.new(1, 0, 1, -40)
+LoginContainer.Position = UDim2.new(0, 0, 0, 40)
+LoginContainer.BackgroundTransparency = 1
+LoginContainer.ZIndex = 5
+
+local KeyInput = Instance.new("TextBox", LoginContainer)
+KeyInput.Size = UDim2.new(0, 350, 0, 45)
+KeyInput.Position = UDim2.new(0.5, -175, 0.4, -20)
+KeyInput.BackgroundColor3 = THEME.Element
+KeyInput.TextColor3 = THEME.Text
+KeyInput.PlaceholderText = "Paste LFB Key Here..."
+KeyInput.PlaceholderColor3 = THEME.TextDim
+KeyInput.Font = Enum.Font.GothamBold
+KeyInput.TextSize = 14
+Instance.new("UICorner", KeyInput).CornerRadius = UDim.new(0, 6)
+local KeyStroke = Instance.new("UIStroke", KeyInput)
+KeyStroke.Color = Color3.fromRGB(60, 60, 60)
+
+local LoginBtn = Instance.new("TextButton", LoginContainer)
+LoginBtn.Size = UDim2.new(0, 150, 0, 45)
+LoginBtn.Position = UDim2.new(0.5, -75, 0.6, 0)
+LoginBtn.BackgroundColor3 = Color3.new(1,1,1)
+LoginBtn.Text = "LOGIN"
+LoginBtn.TextColor3 = Color3.new(1,1,1)
+LoginBtn.Font = Enum.Font.GothamBlack
+LoginBtn.TextSize = 16
+LoginBtn.TextStrokeTransparency = 0.5 -- Outline for readability
+Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 6)
+
+-- Animated Gradient on Button
+AddAnimatedGradient(LoginBtn)
+
+LoginBtn.MouseEnter:Connect(function() Tween(LoginBtn, {Size = UDim2.new(0, 160, 0, 50)}) end)
+LoginBtn.MouseLeave:Connect(function() Tween(LoginBtn, {Size = UDim2.new(0, 150, 0, 45)}) end)
+
+-- // CONTENT AREA //
+local Content = Instance.new("Frame", Main)
+Content.Size = UDim2.new(1, 0, 1, -40)
+Content.Position = UDim2.new(0, 0, 0, 40)
+Content.BackgroundTransparency = 1
+Content.Visible = false
+
+-- Sidebar
+local Sidebar = Instance.new("Frame", Content)
+Sidebar.Size = UDim2.new(0, 130, 1, -20)
+Sidebar.Position = UDim2.new(0, 10, 0, 10)
+Sidebar.BackgroundColor3 = THEME.Element
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 6)
+local SideList = Instance.new("UIListLayout", Sidebar)
+SideList.Padding = UDim.new(0, 5)
+SideList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+SideList.VerticalAlignment = Enum.VerticalAlignment.Center
+
+-- Main List Area
+local ListContainer = Instance.new("Frame", Content)
+ListContainer.Size = UDim2.new(1, -160, 1, -20)
+ListContainer.Position = UDim2.new(0, 150, 0, 10)
+ListContainer.BackgroundTransparency = 1
+
+-- Search Bar
+local SearchBar = Instance.new("TextBox", ListContainer)
+SearchBar.Size = UDim2.new(1, 0, 0, 35)
+SearchBar.BackgroundColor3 = THEME.Element
+SearchBar.PlaceholderText = "Search Brainrot Name..."
+SearchBar.PlaceholderColor3 = THEME.TextDim
+SearchBar.TextColor3 = THEME.Text
+SearchBar.Font = Enum.Font.GothamBold
+SearchBar.TextSize = 14
+Instance.new("UICorner", SearchBar).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", SearchBar).Color = Color3.fromRGB(60, 60, 60)
+
+-- TP Button (Red Gradient)
+local SpecialTP = Instance.new("TextButton", ListContainer)
+SpecialTP.Size = UDim2.new(1, 0, 0, 35)
+SpecialTP.Position = UDim2.new(0, 0, 0, 45)
+SpecialTP.Text = "TP TO SECRET ROOM"
+SpecialTP.Font = Enum.Font.GothamBlack
+SpecialTP.TextColor3 = Color3.new(1,1,1)
+SpecialTP.TextStrokeTransparency = 0.8
+SpecialTP.BackgroundColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", SpecialTP).CornerRadius = UDim.new(0, 6)
+AddAnimatedGradient(SpecialTP)
+
+SpecialTP.MouseButton1Click:Connect(function()
+    LocalPlayer.Character:PivotTo(CFrame.new(34.9884605, 4.25990438, -71.9526138, -0.999717593, 3.02815941e-08, -0.023764642, 2.99051059e-08, 1, 1.61977258e-08, 0.023764642, 1.54824669e-08, -0.999717593))
+end)
+
+-- Scroll Area
+local Scroll = Instance.new("ScrollingFrame", ListContainer)
+Scroll.Size = UDim2.new(1, 0, 1, -90)
+Scroll.Position = UDim2.new(0, 0, 0, 90)
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.ScrollBarThickness = 2
+Scroll.ScrollBarImageColor3 = THEME.RedBright
+Instance.new("UIListLayout", Scroll).Padding = UDim.new(0, 5)
+
+-- // LOGIC //
+
+local function CreateFilterButton(name)
+    local btn = Instance.new("TextButton", Sidebar)
+    btn.Size = UDim2.new(0.85, 0, 0, 30)
+    btn.BackgroundColor3 = THEME.Background
+    btn.Text = name
+    btn.TextColor3 = THEME.Text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 12
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+    
+    local stroke = Instance.new("UIStroke", btn)
+    stroke.Color = THEME.RedDark
+    stroke.Thickness = 1
+
+    btn.MouseButton1Click:Connect(function()
+        ActiveFilters[name] = not ActiveFilters[name]
+        if ActiveFilters[name] then
+            Tween(stroke, {Color = THEME.Success})
+            Tween(btn, {TextColor3 = THEME.Success})
+        else
+            Tween(stroke, {Color = THEME.Error})
+            Tween(btn, {TextColor3 = THEME.TextDim})
+        end
+        Refresh()
+    end)
+    -- Init State
+    if ActiveFilters[name] then 
+        stroke.Color = THEME.Success
+        btn.TextColor3 = THEME.Success 
+    end
+end
+
+for _, f in ipairs({"Common", "Rare", "Epic", "Legendary", "Mythic", "Godly", "Celestial", "Secret"}) do CreateFilterButton(f) end
+
+local function AddRow(model, rarity)
+    if not ActiveFilters[rarity] then return end
+    if SearchText ~= "" and not string.find(string.lower(model.Name), string.lower(SearchText)) then return end
+
+    local Row = Instance.new("Frame", Scroll)
+    Row.Size = UDim2.new(1, -5, 0, 45)
+    Row.BackgroundColor3 = THEME.Element
+    Instance.new("UICorner", Row).CornerRadius = UDim.new(0, 6)
+
+    -- Item Name (White Text)
+    local Name = Instance.new("TextLabel", Row)
+    Name.Text = model.Name
+    Name.Size = UDim2.new(0.5, 0, 1, 0)
+    Name.Position = UDim2.new(0, 10, 0, 0)
+    Name.TextColor3 = THEME.Text
+    Name.Font = Enum.Font.GothamBold
+    Name.TextSize = 14
+    Name.TextXAlignment = Enum.TextXAlignment.Left
+    Name.BackgroundTransparency = 1
+
+    -- Cash Value (Green Text)
+    local Cash = Instance.new("TextLabel", Row)
+    Cash.Text = "..."
+    Cash.Size = UDim2.new(0.3, 0, 1, 0)
+    Cash.Position = UDim2.new(0.4, 0, 0, 0)
+    Cash.TextColor3 = THEME.Success
+    Cash.Font = Enum.Font.GothamBold
+    Cash.TextSize = 14
+    Cash.BackgroundTransparency = 1
+    pcall(function() Cash.Text = model.RootPart.BrainrotAtt.BillboardGui.Cash.Text end)
+
+    -- TP Button
+    local TP = Instance.new("TextButton", Row)
+    TP.Size = UDim2.new(0, 70, 0, 28)
+    TP.Position = UDim2.new(1, -80, 0.5, -14)
+    TP.BackgroundColor3 = Color3.new(1,1,1)
+    TP.Text = "TP"
+    TP.TextColor3 = Color3.new(1,1,1)
+    TP.Font = Enum.Font.GothamBlack
+    Instance.new("UICorner", TP).CornerRadius = UDim.new(0, 4)
+    AddAnimatedGradient(TP)
+
+    TP.MouseButton1Click:Connect(function()
+        LocalPlayer.Character:PivotTo(model.RootPart.CFrame + Vector3.new(0,3,0))
+    end)
+end
+
+function Refresh()
+    for _, v in pairs(Scroll:GetChildren()) do if v:IsA("Frame") then v:Destroy() end end
+    local folder = workspace:FindFirstChild("GameFolder") and workspace.GameFolder:FindFirstChild("Brainrots")
+    if folder then
+        for _, rarity in ipairs({"Common", "Rare", "Epic", "Legendary", "Mythic", "Godly", "Celestial", "Secret"}) do
+            local f = folder:FindFirstChild(rarity)
+            if f then for _, b in pairs(f:GetChildren()) do AddRow(b, rarity) end end
+        end
+    end
+end
+
+SearchBar:GetPropertyChangedSignal("Text"):Connect(function()
+    SearchText = SearchBar.Text
+    Refresh()
+end)
+
+-- Login Logic
+LoginBtn.MouseButton1Click:Connect(function()
+    local key = string.gsub(KeyInput.Text, "%s+", "")
+    local p = string.split(key, "-")
+    
+    if #p >= 3 and p[1] == "LFB" and string.lower(p[3]) == string.lower(LocalPlayer.Name) then
+        Tween(KeyStroke, {Color = THEME.Success})
+        LoginBtn.Text = "GRANTED"
+        wait(0.5)
+        
+        -- Slide Transition
+        Tween(LoginContainer, {Position = UDim2.new(-1, 0, 0, 40)})
+        Content.Visible = true
+        Content.Position = UDim2.new(1, 0, 0, 40)
+        Tween(Content, {Position = UDim2.new(0, 0, 0, 40)})
+        
+        Refresh()
+        task.spawn(function()
+            while task.wait(3) do if SearchText == "" then Refresh() end end
+        end)
+    else
+        Tween(KeyStroke, {Color = THEME.Error})
+        KeyInput.Text = "INVALID KEY"
+        wait(1)
+        KeyInput.Text = ""
+        Tween(KeyStroke, {Color = Color3.fromRGB(60,60,60)})
+    end
+end)
