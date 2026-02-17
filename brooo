@@ -11,14 +11,20 @@ local RAW_URL = "https://pastebin.com/raw/PAkyRQ1r"
 local UI_NAME = "JesterHub_Red_v2"
 local DISCORD_LINK = "https://discord.gg/PY9fzsuK5N"
 local SPAWN_POS = Vector3.new(6.876, 38.761, -31.518)
+local IS_MOBILE = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+-- // MODERN THEME //
 local THEME = {
-    Background = Color3.fromRGB(10, 10, 12),
-    Element    = Color3.fromRGB(20, 20, 20),
-    Text       = Color3.fromRGB(255, 255, 255),
-    RedBright  = Color3.fromRGB(255, 30, 30),
-    RedDark    = Color3.fromRGB(130, 0, 0),
-    Success    = Color3.fromRGB(0, 255, 100),
-    Error      = Color3.fromRGB(255, 0, 0)
+    Background = Color3.fromRGB(15, 15, 20),
+    Card = Color3.fromRGB(25, 25, 30),
+    CardHover = Color3.fromRGB(30, 30, 35),
+    Primary = Color3.fromRGB(255, 60, 60),
+    PrimaryDark = Color3.fromRGB(200, 40, 40),
+    Success = Color3.fromRGB(34, 197, 94),
+    Text = Color3.fromRGB(245, 245, 245),
+    TextDim = Color3.fromRGB(156, 163, 175),
+    Border = Color3.fromRGB(45, 45, 50),
+    Accent = Color3.fromRGB(99, 102, 241)
 }
 
 -- // OPTIMIZER & ESP LOGIC //
@@ -30,26 +36,33 @@ local function InitOptimizer()
 
     local Bg = Instance.new("Frame", LoaderGui)
     Bg.Size = UDim2.new(1, 0, 1, 0)
-    Bg.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+    Bg.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
     Bg.BorderSizePixel = 0
 
     local MainText = Instance.new("TextLabel", Bg)
-    MainText.Size = UDim2.new(1, 0, 0, 50)
-    MainText.Position = UDim2.new(0, 0, 0.5, -30)
+    MainText.Size = UDim2.new(1, 0, 0, 60)
+    MainText.Position = UDim2.new(0, 0, 0.5, -40)
     MainText.BackgroundTransparency = 1
-    MainText.Text = "LOADING OPTIMIZERS..."
-    MainText.TextColor3 = THEME.RedBright
+    MainText.Text = "JESTER HUB"
+    MainText.TextColor3 = THEME.Primary
     MainText.Font = Enum.Font.GothamBlack
-    MainText.TextSize = 30
+    MainText.TextSize = 42
 
     local SubText = Instance.new("TextLabel", Bg)
-    SubText.Size = UDim2.new(1, 0, 0, 20)
+    SubText.Size = UDim2.new(1, 0, 0, 24)
     SubText.Position = UDim2.new(0, 0, 0.5, 20)
     SubText.BackgroundTransparency = 1
-    SubText.Text = "Clearing characters, textures, and setting up Raytracers..."
-    SubText.TextColor3 = Color3.fromRGB(100, 100, 100)
+    SubText.Text = "Optimizing Performance..."
+    SubText.TextColor3 = THEME.TextDim
     SubText.Font = Enum.Font.Gotham
-    SubText.TextSize = 14
+    SubText.TextSize = 16
+
+    local Progress = Instance.new("Frame", Bg)
+    Progress.Size = UDim2.new(0, 0, 0, 3)
+    Progress.Position = UDim2.new(0.5, -150, 0.5, 60)
+    Progress.BackgroundColor3 = THEME.Primary
+    Progress.BorderSizePixel = 0
+    TweenService:Create(Progress, TweenInfo.new(1.5), {Size = UDim2.new(0, 300, 0, 3)}):Play()
 
     task.wait(0.2)
 
@@ -85,43 +98,49 @@ local function InitOptimizer()
         end
     end
 
-    MainText.Text = "OPTIMIZATION READY"
-    task.wait(0.8)
+    SubText.Text = "Ready!"
+    task.wait(0.6)
 
-    TweenService:Create(Bg, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(MainText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(SubText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    task.delay(1, function() LoaderGui:Destroy() end)
+    TweenService:Create(Bg, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(MainText, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+    TweenService:Create(SubText, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+    TweenService:Create(Progress, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+    task.delay(0.8, function() LoaderGui:Destroy() end)
 end
 
--- // RAYTRACER / ESP SYSTEM //
+-- // ESP SYSTEM //
 local function CreateESP(part, rarity)
     if not part:FindFirstChild("JesterESP") then
         local bg = Instance.new("BillboardGui", part)
         bg.Name = "JesterESP"
         bg.AlwaysOnTop = true
-        bg.Size = UDim2.new(0, 100, 0, 30)
+        bg.Size = UDim2.new(0, 120, 0, 40)
         bg.ExtentsOffset = Vector3.new(0, 3, 0)
 
-        local txt = Instance.new("TextLabel", bg)
+        local container = Instance.new("Frame", bg)
+        container.Size = UDim2.new(1, 0, 1, 0)
+        container.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        container.BackgroundTransparency = 0.3
+        container.BorderSizePixel = 0
+        Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
+
+        local txt = Instance.new("TextLabel", container)
         txt.Size = UDim2.new(1, 0, 1, 0)
         txt.BackgroundTransparency = 1
-        txt.Text = "[" .. rarity:upper() .. "]"
-        txt.TextColor3 = (rarity == "Celestial") and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(255, 200, 0)
-        txt.Font = Enum.Font.GothamBlack
+        txt.Text = rarity:upper()
+        txt.TextColor3 = (rarity == "Celestial") and Color3.fromRGB(96, 165, 250) or Color3.fromRGB(251, 191, 36)
+        txt.Font = Enum.Font.GothamBold
         txt.TextSize = 14
 
         local Line = Instance.new("Beam", part)
-        Line.Width0 = 0.2
-        Line.Width1 = 0.2
-        Line.Transparency = NumberSequence.new(0.5)
+        Line.Width0, Line.Width1 = 0.3, 0.3
+        Line.Transparency = NumberSequence.new(0.4)
         Line.FaceCamera = true
         Line.Color = ColorSequence.new(txt.TextColor3)
         
         local A1 = Instance.new("Attachment", part)
         local A2 = Instance.new("Attachment", LocalPlayer.Character:WaitForChild("HumanoidRootPart"))
-        Line.Attachment0 = A1
-        Line.Attachment1 = A2
+        Line.Attachment0, Line.Attachment1 = A1, A2
         
         task.spawn(function()
             while part and part.Parent do
@@ -145,6 +164,7 @@ local UIPool = {}
 local TPConnections = {}
 local ExtraButtons = {}
 local IsGrinding = false
+local CurrentTab = "Teleports"
 
 -- // CLEANUP //
 if LocalPlayer.PlayerGui:FindFirstChild(UI_NAME) then
@@ -156,95 +176,297 @@ local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
 ScreenGui.Name = UI_NAME
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- // PERMANENT TOP OVERLAY //
-local TopOverlay = Instance.new("Frame", ScreenGui)
-TopOverlay.Size = UDim2.new(1, 0, 0, 35)
-TopOverlay.BackgroundColor3 = Color3.new(0,0,0)
-TopOverlay.BackgroundTransparency = 0.3
-TopOverlay.ZIndex = 999
+-- // UTILITY FUNCTIONS //
+local function CreateCorner(parent, radius)
+    local corner = Instance.new("UICorner", parent)
+    corner.CornerRadius = UDim.new(0, radius or 8)
+    return corner
+end
 
-local DiscordText = Instance.new("TextLabel", TopOverlay)
-DiscordText.Size = UDim2.new(1, 0, 1, 0)
-DiscordText.BackgroundTransparency = 1
-DiscordText.Text = "JOIN DISCORD: " .. DISCORD_LINK
-DiscordText.TextColor3 = Color3.new(1,1,1)
-DiscordText.Font = Enum.Font.GothamBlack
-DiscordText.TextSize = 18
+local function CreateStroke(parent, color, thickness)
+    local stroke = Instance.new("UIStroke", parent)
+    stroke.Color = color
+    stroke.Thickness = thickness or 1
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    return stroke
+end
 
--- // UI BUILDER HELPERS //
-local function AddAnimatedGradient(parent)
-    local g = Instance.new("UIGradient", parent)
-    g.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, THEME.RedDark),
-        ColorSequenceKeypoint.new(0.5, THEME.RedBright),
-        ColorSequenceKeypoint.new(1, THEME.RedDark)
-    }
-    task.spawn(function()
-        while g and g.Parent do g.Rotation = g.Rotation + 2 task.wait(0.03) end
-    end)
+local function CreateShadow(parent)
+    local shadow = Instance.new("ImageLabel", parent)
+    shadow.Name = "Shadow"
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://5554236805"
+    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.ImageTransparency = 0.7
+    shadow.ScaleType = Enum.ScaleType.Slice
+    shadow.SliceCenter = Rect.new(23, 23, 277, 277)
+    shadow.Size = UDim2.new(1, 20, 1, 20)
+    shadow.Position = UDim2.new(0, -10, 0, -10)
+    shadow.ZIndex = parent.ZIndex - 1
+    return shadow
 end
 
 local function MakeDraggable(object)
     local dragging, dragInput, dragStart, startPos
+    
     object.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true; dragStart = input.Position; startPos = object.Position
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = object.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
+    
+    object.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
     UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+        if input == dragInput and dragging then
             local delta = input.Position - dragStart
             object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-    end)
 end
 
 -- // MAIN WINDOW //
+local MainSize = IS_MOBILE and UDim2.new(0.9, 0, 0.7, 0) or UDim2.new(0, 680, 0, 480)
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 600, 0, 420)
-Main.Position = UDim2.new(0.5, -300, 0.5, -210)
+Main.Name = "Main"
+Main.Size = MainSize
+Main.Position = UDim2.new(0.5, -MainSize.X.Offset/2, 0.5, -MainSize.Y.Offset/2)
+Main.AnchorPoint = Vector2.new(0, 0)
 Main.BackgroundColor3 = THEME.Background
-Main.ClipsDescendants = true
-Instance.new("UICorner", Main)
-local MainStroke = Instance.new("UIStroke", Main); MainStroke.Thickness = 2; AddAnimatedGradient(MainStroke)
-MakeDraggable(Main)
+Main.ClipsDescendants = false
+Main.BorderSizePixel = 0
+CreateCorner(Main, 12)
+CreateShadow(Main)
+if not IS_MOBILE then MakeDraggable(Main) end
 
-local ToggleFrame = Instance.new("Frame", ScreenGui)
-ToggleFrame.Size, ToggleFrame.Position = UDim2.new(0, 60, 0, 60), UDim2.new(0, 30, 0.5, -30)
-ToggleFrame.BackgroundColor3 = THEME.Background
-Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(1, 0)
-local ToggleStroke = Instance.new("UIStroke", ToggleFrame); ToggleStroke.Thickness = 3; AddAnimatedGradient(ToggleStroke)
-local ToggleBtn = Instance.new("TextButton", ToggleFrame)
-ToggleBtn.Size, ToggleBtn.BackgroundTransparency, ToggleBtn.Text, ToggleBtn.TextColor3, ToggleBtn.Font, ToggleBtn.TextSize = UDim2.new(1,0,1,0), 1, "JH", THEME.Text, "GothamBlack", 24
-ToggleBtn.MouseButton1Click:Connect(function() UI_OPEN = not UI_OPEN; Main.Visible = UI_OPEN end)
+-- // TOP BAR //
+local TopBar = Instance.new("Frame", Main)
+TopBar.Name = "TopBar"
+TopBar.Size = UDim2.new(1, 0, 0, 60)
+TopBar.BackgroundColor3 = THEME.Card
+TopBar.BorderSizePixel = 0
+CreateCorner(TopBar, 12)
 
-local LoginContainer = Instance.new("Frame", Main); LoginContainer.Size, LoginContainer.Position, LoginContainer.BackgroundTransparency = UDim2.new(1,0,1,-40), UDim2.new(0,0,0,40), 1
-local Content = Instance.new("Frame", Main); Content.Size, Content.Position, Content.BackgroundTransparency, Content.Visible = UDim2.new(1,0,1,-40), UDim2.new(1.1,0,0,40), 1, false
+local TopBarBottom = Instance.new("Frame", TopBar)
+TopBarBottom.Size = UDim2.new(1, 0, 0, 12)
+TopBarBottom.Position = UDim2.new(0, 0, 1, -12)
+TopBarBottom.BackgroundColor3 = THEME.Card
+TopBarBottom.BorderSizePixel = 0
 
-local KeyInput = Instance.new("TextBox", LoginContainer); KeyInput.Size, KeyInput.Position, KeyInput.BackgroundColor3, KeyInput.TextColor3, KeyInput.PlaceholderText, KeyInput.Font, KeyInput.TextSize = UDim2.new(0,350,0,45), UDim2.new(0.5,-175,0.4,-20), THEME.Element, THEME.Text, "PASTE KEY HERE...", "GothamBold", 14; Instance.new("UICorner", KeyInput)
-local LoginBtn = Instance.new("TextButton", LoginContainer); LoginBtn.Size, LoginBtn.Position, LoginBtn.Text, LoginBtn.TextColor3, LoginBtn.Font = UDim2.new(0,150,0,45), UDim2.new(0.5,-75,0.6,0), "VERIFY", Color3.new(1,1,1), "GothamBlack"; Instance.new("UICorner", LoginBtn); AddAnimatedGradient(LoginBtn)
+local Logo = Instance.new("TextLabel", TopBar)
+Logo.Size = UDim2.new(0, 200, 1, 0)
+Logo.Position = UDim2.new(0, 20, 0, 0)
+Logo.BackgroundTransparency = 1
+Logo.Text = "JESTER HUB"
+Logo.TextColor3 = THEME.Primary
+Logo.Font = Enum.Font.GothamBlack
+Logo.TextSize = IS_MOBILE and 18 or 22
+Logo.TextXAlignment = Enum.TextXAlignment.Left
 
-local Sidebar = Instance.new("Frame", Content); Sidebar.Size, Sidebar.Position, Sidebar.BackgroundColor3 = UDim2.new(0,130,1,-20), UDim2.new(0,10,0,10), THEME.Element; Instance.new("UICorner", Sidebar)
-local TabContainer = Instance.new("Frame", Sidebar); TabContainer.Size, TabContainer.BackgroundTransparency = UDim2.new(1,0,0,100), 1; local TabList = Instance.new("UIListLayout", TabContainer); TabList.Padding, TabList.HorizontalAlignment = UDim.new(0,5), "Center"
-local FilterContainer = Instance.new("Frame", Sidebar); FilterContainer.Size, FilterContainer.Position, FilterContainer.BackgroundTransparency = UDim2.new(1,0,1,-110), UDim2.new(0,0,0,110), 1; local FList = Instance.new("UIListLayout", FilterContainer); FList.Padding, FList.HorizontalAlignment = UDim.new(0,5), "Center"
+local DiscordBtn = Instance.new("TextButton", TopBar)
+DiscordBtn.Size = UDim2.new(0, IS_MOBILE and 100 or 120, 0, 36)
+DiscordBtn.Position = UDim2.new(1, IS_MOBILE and -110 or -130, 0.5, -18)
+DiscordBtn.BackgroundColor3 = THEME.Accent
+DiscordBtn.Text = "DISCORD"
+DiscordBtn.TextColor3 = THEME.Text
+DiscordBtn.Font = Enum.Font.GothamBold
+DiscordBtn.TextSize = IS_MOBILE and 12 or 14
+DiscordBtn.BorderSizePixel = 0
+CreateCorner(DiscordBtn, 6)
+DiscordBtn.MouseButton1Click:Connect(function()
+    setclipboard(DISCORD_LINK)
+    DiscordBtn.Text = "COPIED!"
+    task.wait(2)
+    DiscordBtn.Text = "DISCORD"
+end)
 
-local Page_Teleports = Instance.new("Frame", Content); Page_Teleports.Size, Page_Teleports.Position, Page_Teleports.BackgroundTransparency = UDim2.new(1,-160,1,-20), UDim2.new(0,150,0,10), 1
-local Page_Extras = Instance.new("Frame", Content); Page_Extras.Size, Page_Extras.Position, Page_Extras.BackgroundTransparency, Page_Extras.Visible = UDim2.new(1,-160,1,-20), UDim2.new(0,150,0,10), 1, false
-Instance.new("UIListLayout", Page_Extras).Padding = UDim.new(0,10)
+-- // MOBILE TOGGLE BUTTON //
+if IS_MOBILE then
+    local ToggleBtn = Instance.new("TextButton", ScreenGui)
+    ToggleBtn.Name = "MobileToggle"
+    ToggleBtn.Size = UDim2.new(0, 70, 0, 70)
+    ToggleBtn.Position = UDim2.new(0, 20, 0, 100)
+    ToggleBtn.BackgroundColor3 = THEME.Primary
+    ToggleBtn.Text = "JH"
+    ToggleBtn.TextColor3 = THEME.Text
+    ToggleBtn.Font = Enum.Font.GothamBlack
+    ToggleBtn.TextSize = 24
+    ToggleBtn.BorderSizePixel = 0
+    CreateCorner(ToggleBtn, 35)
+    CreateShadow(ToggleBtn)
+    CreateStroke(ToggleBtn, THEME.Border, 2)
+    
+    MakeDraggable(ToggleBtn)
+    
+    ToggleBtn.MouseButton1Click:Connect(function()
+        UI_OPEN = not UI_OPEN
+        Main.Visible = UI_OPEN
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {
+            Rotation = UI_OPEN and 180 or 0
+        }):Play()
+    end)
+end
+
+-- // LOGIN CONTAINER //
+local LoginContainer = Instance.new("Frame", Main)
+LoginContainer.Name = "LoginContainer"
+LoginContainer.Size = UDim2.new(1, 0, 1, -60)
+LoginContainer.Position = UDim2.new(0, 0, 0, 60)
+LoginContainer.BackgroundTransparency = 1
+
+local LoginCard = Instance.new("Frame", LoginContainer)
+LoginCard.Size = UDim2.new(0, IS_MOBILE and 300 or 400, 0, IS_MOBILE and 200 or 240)
+LoginCard.Position = UDim2.new(0.5, IS_MOBILE and -150 or -200, 0.5, IS_MOBILE and -100 or -120)
+LoginCard.BackgroundColor3 = THEME.Card
+LoginCard.BorderSizePixel = 0
+CreateCorner(LoginCard, 12)
+CreateShadow(LoginCard)
+
+local LoginTitle = Instance.new("TextLabel", LoginCard)
+LoginTitle.Size = UDim2.new(1, -40, 0, 40)
+LoginTitle.Position = UDim2.new(0, 20, 0, 20)
+LoginTitle.BackgroundTransparency = 1
+LoginTitle.Text = "Enter License Key"
+LoginTitle.TextColor3 = THEME.Text
+LoginTitle.Font = Enum.Font.GothamBold
+LoginTitle.TextSize = IS_MOBILE and 16 or 20
+LoginTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local KeyInput = Instance.new("TextBox", LoginCard)
+KeyInput.Size = UDim2.new(1, -40, 0, IS_MOBILE and 40 or 50)
+KeyInput.Position = UDim2.new(0, 20, 0, IS_MOBILE and 70 or 80)
+KeyInput.BackgroundColor3 = THEME.Background
+KeyInput.TextColor3 = THEME.Text
+KeyInput.PlaceholderText = "Paste your key here..."
+KeyInput.PlaceholderColor3 = THEME.TextDim
+KeyInput.Font = Enum.Font.Gotham
+KeyInput.TextSize = IS_MOBILE and 13 or 15
+KeyInput.Text = ""
+KeyInput.ClearTextOnFocus = false
+KeyInput.BorderSizePixel = 0
+CreateCorner(KeyInput, 8)
+CreateStroke(KeyInput, THEME.Border, 1)
+
+local VerifyBtn = Instance.new("TextButton", LoginCard)
+VerifyBtn.Size = UDim2.new(1, -40, 0, IS_MOBILE and 40 or 50)
+VerifyBtn.Position = UDim2.new(0, 20, 1, IS_MOBILE and -60 or -70)
+VerifyBtn.BackgroundColor3 = THEME.Primary
+VerifyBtn.Text = "VERIFY KEY"
+VerifyBtn.TextColor3 = THEME.Text
+VerifyBtn.Font = Enum.Font.GothamBold
+VerifyBtn.TextSize = IS_MOBILE and 14 or 16
+VerifyBtn.BorderSizePixel = 0
+CreateCorner(VerifyBtn, 8)
+
+-- // CONTENT CONTAINER //
+local Content = Instance.new("Frame", Main)
+Content.Name = "Content"
+Content.Size = UDim2.new(1, 0, 1, -60)
+Content.Position = UDim2.new(0, 0, 0, 60)
+Content.BackgroundTransparency = 1
+Content.Visible = false
+
+-- // TAB NAVIGATION //
+local TabNav = Instance.new("Frame", Content)
+TabNav.Size = IS_MOBILE and UDim2.new(1, 0, 0, 50) or UDim2.new(0, 180, 1, -20)
+TabNav.Position = IS_MOBILE and UDim2.new(0, 0, 0, 0) or UDim2.new(0, 10, 0, 10)
+TabNav.BackgroundTransparency = 1
+
+local TabContainer = Instance.new("Frame", TabNav)
+TabContainer.Size = UDim2.new(1, 0, 1, 0)
+TabContainer.BackgroundTransparency = 1
+local TabLayout = Instance.new("UIListLayout", TabContainer)
+TabLayout.Padding = UDim.new(0, 8)
+TabLayout.FillDirection = IS_MOBILE and Enum.FillDirection.Horizontal or Enum.FillDirection.Vertical
+TabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- // PAGE CONTAINERS //
+local PageContainer = Instance.new("Frame", Content)
+PageContainer.Size = IS_MOBILE and UDim2.new(1, -20, 1, -70) or UDim2.new(1, -210, 1, -20)
+PageContainer.Position = IS_MOBILE and UDim2.new(0, 10, 0, 60) or UDim2.new(0, 200, 0, 10)
+PageContainer.BackgroundTransparency = 1
+PageContainer.ClipsDescendants = true
+
+local Page_Teleports = Instance.new("Frame", PageContainer)
+Page_Teleports.Name = "Teleports"
+Page_Teleports.Size = UDim2.new(1, 0, 1, 0)
+Page_Teleports.BackgroundTransparency = 1
+Page_Teleports.Visible = true
+
+local Page_Extras = Instance.new("Frame", PageContainer)
+Page_Extras.Name = "Extras"
+Page_Extras.Size = UDim2.new(1, 0, 1, 0)
+Page_Extras.BackgroundTransparency = 1
+Page_Extras.Visible = false
+
+local Page_Filters = Instance.new("Frame", PageContainer)
+Page_Filters.Name = "Filters"
+Page_Filters.Size = UDim2.new(1, 0, 1, 0)
+Page_Extras.BackgroundTransparency = 1
+Page_Filters.Visible = false
+
+-- // TELEPORTS PAGE //
+local SearchBar = Instance.new("TextBox", Page_Teleports)
+SearchBar.Size = UDim2.new(1, 0, 0, IS_MOBILE and 40 : 45)
+SearchBar.BackgroundColor3 = THEME.Card
+SearchBar.PlaceholderText = "🔍 Search items..."
+SearchBar.PlaceholderColor3 = THEME.TextDim
+SearchBar.TextColor3 = THEME.Text
+SearchBar.Font = Enum.Font.Gotham
+SearchBar.TextSize = IS_MOBILE and 13 or 15
+SearchBar.Text = ""
+SearchBar.BorderSizePixel = 0
+CreateCorner(SearchBar, 8)
+CreateStroke(SearchBar, THEME.Border, 1)
+
+local Scroll = Instance.new("ScrollingFrame", Page_Teleports)
+Scroll.Size = UDim2.new(1, 0, 1, IS_MOBILE and -50 or -55)
+Scroll.Position = UDim2.new(0, 0, 0, IS_MOBILE and 50 or 55)
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.ScrollBarThickness = 4
+Scroll.ScrollBarImageColor3 = THEME.Primary
+local ScrollLayout = Instance.new("UIListLayout", Scroll)
+ScrollLayout.Padding = UDim.new(0, 8)
+ScrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- // EXTRAS PAGE //
+local ExtrasLayout = Instance.new("UIListLayout", Page_Extras)
+ExtrasLayout.Padding = UDim.new(0, 10)
+ExtrasLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- // FILTERS PAGE //
+local FiltersScroll = Instance.new("ScrollingFrame", Page_Filters)
+FiltersScroll.Size = UDim2.new(1, 0, 1, 0)
+FiltersScroll.BackgroundTransparency = 1
+FiltersScroll.BorderSizePixel = 0
+FiltersScroll.ScrollBarThickness = 4
+FiltersScroll.ScrollBarImageColor3 = THEME.Primary
+local FiltersLayout = Instance.new("UIListLayout", FiltersScroll)
+FiltersLayout.Padding = UDim.new(0, 10)
+FiltersLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 -- // AFK GRIND SYSTEM //
 local function HoldEFor4Seconds(targetPart)
     local proximityPrompt = targetPart:FindFirstChildOfClass("ProximityPrompt", true)
     if proximityPrompt then
-        -- Fire the proximity prompt
         fireproximityprompt(proximityPrompt)
         task.wait(4)
     else
-        -- Fallback: simulate holding E
         local VirtualInputManager = game:GetService("VirtualInputManager")
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
         task.wait(4)
@@ -260,7 +482,6 @@ local function AFKGrindLoop()
         
         if not AFKGrindEnabled or IsGrinding then continue end
         
-        -- Check Godly and Celestial folders for items
         local targetModel = nil
         for _, rarity in ipairs({"Godly", "Celestial"}) do
             local rFolder = brainFolder:FindFirstChild(rarity)
@@ -278,14 +499,11 @@ local function AFKGrindLoop()
         if targetModel and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             IsGrinding = true
             
-            -- Step 1: TP to the item
             LocalPlayer.Character:PivotTo(targetModel.RootPart.CFrame + Vector3.new(0, 3, 0))
             task.wait(0.5)
             
-            -- Step 2: Hold E for 4 seconds
             HoldEFor4Seconds(targetModel.RootPart)
             
-            -- Step 3: TP to spawn/secret room for 4 seconds
             LocalPlayer.Character:PivotTo(CFrame.new(SPAWN_POS))
             task.wait(4)
             
@@ -294,10 +512,7 @@ local function AFKGrindLoop()
     end
 end
 
--- // REFRESH & ESP UPDATER //
-local SearchBar = Instance.new("TextBox", Page_Teleports); SearchBar.Size, SearchBar.BackgroundColor3, SearchBar.PlaceholderText, SearchBar.TextColor3, SearchBar.Font, SearchBar.TextSize = UDim2.new(1,-90,0,35), THEME.Element, "SEARCH...", THEME.Text, "GothamBold", 14; Instance.new("UICorner", SearchBar)
-local Scroll = Instance.new("ScrollingFrame", Page_Teleports); Scroll.Size, Scroll.Position, Scroll.BackgroundTransparency, Scroll.BorderSizePixel = UDim2.new(1,0,1,-45), UDim2.new(0,0,0,45), 1, 0; Instance.new("UIListLayout", Scroll).Padding = UDim.new(0,5)
-
+-- // REFRESH FUNCTION //
 local function Refresh()
     for _, row in pairs(UIPool) do 
         row.Visible = false 
@@ -322,9 +537,35 @@ local function Refresh()
                 if ActiveFilters[rarity] and (SearchText == "" or string.find(string.lower(model.Name), string.lower(SearchText))) then
                     local Row = UIPool[count]
                     if not Row then
-                        Row = Instance.new("Frame"); Row.Size = UDim2.new(1,-5,0,45); Row.BackgroundColor3 = THEME.Element; Instance.new("UICorner", Row)
-                        local Title = Instance.new("TextLabel", Row); Title.Name = "Title"; Title.Size, Title.Position, Title.TextColor3, Title.Font, Title.BackgroundTransparency, Title.TextXAlignment = UDim2.new(0.6,0,1,0), UDim2.new(0,10,0,0), THEME.Text, "GothamBold", 1, "Left"
-                        local TP = Instance.new("TextButton", Row); TP.Name = "TPBtn"; TP.Size, TP.Position, TP.Text = UDim2.new(0,60,0,25), UDim2.new(1,-70,0.5,-12), "TP"; Instance.new("UICorner", TP); AddAnimatedGradient(TP)
+                        Row = Instance.new("Frame")
+                        Row.Size = UDim2.new(1, 0, 0, IS_MOBILE and 50 or 55)
+                        Row.BackgroundColor3 = THEME.Card
+                        Row.BorderSizePixel = 0
+                        CreateCorner(Row, 8)
+                        
+                        local Title = Instance.new("TextLabel", Row)
+                        Title.Name = "Title"
+                        Title.Size = UDim2.new(1, IS_MOBILE and -70 or -80, 1, 0)
+                        Title.Position = UDim2.new(0, 15, 0, 0)
+                        Title.TextColor3 = THEME.Text
+                        Title.Font = Enum.Font.GothamMedium
+                        Title.TextSize = IS_MOBILE and 13 or 15
+                        Title.BackgroundTransparency = 1
+                        Title.TextXAlignment = Enum.TextXAlignment.Left
+                        Title.TextTruncate = Enum.TextTruncate.AtEnd
+                        
+                        local TPBtn = Instance.new("TextButton", Row)
+                        TPBtn.Name = "TPBtn"
+                        TPBtn.Size = UDim2.new(0, IS_MOBILE and 55 or 60, 0, IS_MOBILE and 35 or 40)
+                        TPBtn.Position = UDim2.new(1, IS_MOBILE and -60 or -65, 0.5, IS_MOBILE and -17.5 or -20)
+                        TPBtn.BackgroundColor3 = THEME.Primary
+                        TPBtn.Text = "TP"
+                        TPBtn.TextColor3 = THEME.Text
+                        TPBtn.Font = Enum.Font.GothamBold
+                        TPBtn.TextSize = IS_MOBILE and 12 or 14
+                        TPBtn.BorderSizePixel = 0
+                        CreateCorner(TPBtn, 6)
+                        
                         UIPool[count] = Row
                     end
                     
@@ -344,6 +585,8 @@ local function Refresh()
             end
         end
     end
+    
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, ScrollLayout.AbsoluteContentSize.Y)
 end
 
 -- // CORE CHEATS //
@@ -374,74 +617,330 @@ end)
 -- // UI BUILDERS //
 local function UpdateToggleVisual(name, state)
     local btn = ExtraButtons[name]
-    if btn then btn.Text = state and "ON" or "OFF"; btn.TextColor3 = state and THEME.Success or THEME.RedBright end
+    if btn then 
+        btn.BackgroundColor3 = state and THEME.Success or THEME.Card
+        btn.Indicator.BackgroundColor3 = state and THEME.Text or THEME.TextDim
+        if IS_MOBILE then
+            TweenService:Create(btn.Indicator, TweenInfo.new(0.2), {
+                Position = state and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+            }):Play()
+        else
+            btn.Status.Text = state and "ON" or "OFF"
+            btn.Status.TextColor3 = state and THEME.Success or THEME.TextDim
+        end
+    end
 end
 
-local function CreateExtraToggle(text, callback)
-    local Frame = Instance.new("Frame", Page_Extras); Frame.Size, Frame.BackgroundColor3 = UDim2.new(1,0,0,45), THEME.Element; Instance.new("UICorner", Frame)
-    local Label = Instance.new("TextLabel", Frame); Label.Text, Label.Size, Label.Position, Label.TextColor3, Label.Font, Label.BackgroundTransparency, Label.TextXAlignment = text, UDim2.new(0.6,0,1,0), UDim2.new(0,10,0,0), THEME.Text, "GothamBold", 1, "Left"
-    local Btn = Instance.new("TextButton", Frame); Btn.Size, Btn.Position, Btn.BackgroundColor3, Btn.Text, Btn.TextColor3 = UDim2.new(0,80,0,30), UDim2.new(1,-90,0.5,-15), THEME.Background, "OFF", THEME.RedBright; Instance.new("UICorner", Btn)
-    local state = false
-    Btn.MouseButton1Click:Connect(function() state = not state; callback(state); UpdateToggleVisual(text, state) end)
-    ExtraButtons[text] = Btn
+local function CreateExtraToggle(text, icon, callback)
+    local Frame = Instance.new("Frame", Page_Extras)
+    Frame.Size = UDim2.new(1, 0, 0, IS_MOBILE and 60 or 65)
+    Frame.BackgroundColor3 = THEME.Card
+    Frame.BorderSizePixel = 0
+    CreateCorner(Frame, 8)
+    
+    local Icon = Instance.new("TextLabel", Frame)
+    Icon.Size = UDim2.new(0, 40, 0, 40)
+    Icon.Position = UDim2.new(0, 15, 0.5, -20)
+    Icon.BackgroundColor3 = THEME.Background
+    Icon.Text = icon
+    Icon.TextColor3 = THEME.Primary
+    Icon.Font = Enum.Font.GothamBold
+    Icon.TextSize = 20
+    Icon.BorderSizePixel = 0
+    CreateCorner(Icon, 8)
+    
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Size = UDim2.new(1, IS_MOBILE and -140 or -200, 1, 0)
+    Label.Position = UDim2.new(0, 65, 0, 0)
+    Label.Text = text
+    Label.TextColor3 = THEME.Text
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextSize = IS_MOBILE and 13 or 15
+    Label.BackgroundTransparency = 1
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    if IS_MOBILE then
+        -- Mobile toggle switch
+        local Toggle = Instance.new("TextButton", Frame)
+        Toggle.Size = UDim2.new(0, 50, 0, 26)
+        Toggle.Position = UDim2.new(1, -60, 0.5, -13)
+        Toggle.BackgroundColor3 = THEME.Card
+        Toggle.Text = ""
+        Toggle.BorderSizePixel = 0
+        CreateCorner(Toggle, 13)
+        CreateStroke(Toggle, THEME.Border, 2)
+        
+        local Indicator = Instance.new("Frame", Toggle)
+        Indicator.Name = "Indicator"
+        Indicator.Size = UDim2.new(0, 20, 0, 20)
+        Indicator.Position = UDim2.new(0, 2, 0.5, -10)
+        Indicator.BackgroundColor3 = THEME.TextDim
+        Indicator.BorderSizePixel = 0
+        CreateCorner(Indicator, 10)
+        
+        local state = false
+        Toggle.MouseButton1Click:Connect(function()
+            state = not state
+            callback(state)
+            UpdateToggleVisual(text, state)
+        end)
+        
+        ExtraButtons[text] = Toggle
+    else
+        -- Desktop button
+        local Btn = Instance.new("TextButton", Frame)
+        Btn.Size = UDim2.new(0, 80, 0, 35)
+        Btn.Position = UDim2.new(1, -90, 0.5, -17.5)
+        Btn.BackgroundColor3 = THEME.Card
+        Btn.Text = ""
+        Btn.BorderSizePixel = 0
+        CreateCorner(Btn, 6)
+        CreateStroke(Btn, THEME.Border, 2)
+        
+        local Status = Instance.new("TextLabel", Btn)
+        Status.Name = "Status"
+        Status.Size = UDim2.new(1, 0, 1, 0)
+        Status.BackgroundTransparency = 1
+        Status.Text = "OFF"
+        Status.TextColor3 = THEME.TextDim
+        Status.Font = Enum.Font.GothamBold
+        Status.TextSize = 13
+        
+        local state = false
+        Btn.MouseButton1Click:Connect(function()
+            state = not state
+            callback(state)
+            UpdateToggleVisual(text, state)
+        end)
+        
+        ExtraButtons[text] = Btn
+    end
 end
 
-CreateExtraToggle("AFK Grind (H-bind)", function(v) 
+CreateExtraToggle("AFK Grind", "⚡", function(v) 
     AFKGrindEnabled = v
-    if v then
-        task.spawn(AFKGrindLoop)
-    end
+    if v then task.spawn(AFKGrindLoop) end
 end)
-CreateExtraToggle("Auto Bat (G-bind)", function(v) AutoBatEnabled = v end)
-CreateExtraToggle("Auto Steal (F-bind)", function(v) AutoStealEnabled = v end)
-CreateExtraToggle("Auto Hit (Nearby)", function(v) AutoHitEnabled = v end)
+CreateExtraToggle("Auto Bat", "🏏", function(v) AutoBatEnabled = v end)
+CreateExtraToggle("Auto Steal", "💰", function(v) AutoStealEnabled = v end)
+CreateExtraToggle("Auto Hit", "👊", function(v) AutoHitEnabled = v end)
 
-UserInputService.InputBegan:Connect(function(i, g)
-    if g then return end
-    if i.KeyCode == Enum.KeyCode.H then 
-        AFKGrindEnabled = not AFKGrindEnabled
-        UpdateToggleVisual("AFK Grind (H-bind)", AFKGrindEnabled)
-        if AFKGrindEnabled then task.spawn(AFKGrindLoop) end
-    elseif i.KeyCode == Enum.KeyCode.G then 
-        AutoBatEnabled = not AutoBatEnabled
-        UpdateToggleVisual("Auto Bat (G-bind)", AutoBatEnabled)
-    elseif i.KeyCode == Enum.KeyCode.F then 
-        AutoStealEnabled = not AutoStealEnabled
-        UpdateToggleVisual("Auto Steal (F-bind)", AutoStealEnabled)
-    end
-end)
-
-local function CreateTab(name, page)
-    local b = Instance.new("TextButton", TabContainer); b.Size, b.Text, b.BackgroundColor3, b.TextColor3, b.Font = UDim2.new(0.9,0,0,30), name, THEME.Background, THEME.Text, "GothamBlack"; Instance.new("UICorner", b)
-    b.MouseButton1Click:Connect(function() Page_Teleports.Visible, Page_Extras.Visible, FilterContainer.Visible = false, false, false; page.Visible = true; if page == Page_Teleports then FilterContainer.Visible = true end end)
+-- // KEYBINDS (Desktop only) //
+if not IS_MOBILE then
+    UserInputService.InputBegan:Connect(function(i, g)
+        if g then return end
+        if i.KeyCode == Enum.KeyCode.H then 
+            AFKGrindEnabled = not AFKGrindEnabled
+            UpdateToggleVisual("AFK Grind", AFKGrindEnabled)
+            if AFKGrindEnabled then task.spawn(AFKGrindLoop) end
+        elseif i.KeyCode == Enum.KeyCode.G then 
+            AutoBatEnabled = not AutoBatEnabled
+            UpdateToggleVisual("Auto Bat", AutoBatEnabled)
+        elseif i.KeyCode == Enum.KeyCode.F then 
+            AutoStealEnabled = not AutoStealEnabled
+            UpdateToggleVisual("Auto Steal", AutoStealEnabled)
+        end
+    end)
 end
-CreateTab("Teleports", Page_Teleports); CreateTab("Extras", Page_Extras)
+
+-- // TAB SYSTEM //
+local function CreateTab(name, icon, page)
+    local isActive = page == Page_Teleports
+    
+    local Tab = Instance.new("TextButton", TabContainer)
+    Tab.Name = name
+    Tab.Size = IS_MOBILE and UDim2.new(0, 110, 1, -10) or UDim2.new(1, 0, 0, 45)
+    Tab.BackgroundColor3 = isActive and THEME.Primary or THEME.Card
+    Tab.Text = ""
+    Tab.BorderSizePixel = 0
+    CreateCorner(Tab, 8)
+    
+    if not IS_MOBILE then
+        local ActiveIndicator = Instance.new("Frame", Tab)
+        ActiveIndicator.Name = "Indicator"
+        ActiveIndicator.Size = UDim2.new(0, 4, 0.6, 0)
+        ActiveIndicator.Position = UDim2.new(0, 0, 0.2, 0)
+        ActiveIndicator.BackgroundColor3 = THEME.Primary
+        ActiveIndicator.BorderSizePixel = 0
+        ActiveIndicator.Visible = isActive
+        CreateCorner(ActiveIndicator, 2)
+    end
+    
+    local Icon = Instance.new("TextLabel", Tab)
+    Icon.Size = IS_MOBILE and UDim2.new(0, 25, 0, 25) or UDim2.new(0, 30, 0, 30)
+    Icon.Position = IS_MOBILE and UDim2.new(0, 10, 0.5, -12.5) or UDim2.new(0, 12, 0.5, -15)
+    Icon.BackgroundTransparency = 1
+    Icon.Text = icon
+    Icon.TextColor3 = isActive and THEME.Text or THEME.TextDim
+    Icon.Font = Enum.Font.GothamBold
+    Icon.TextSize = IS_MOBILE and 16 or 18
+    
+    local Label = Instance.new("TextLabel", Tab)
+    Label.Size = IS_MOBILE and UDim2.new(1, -40, 1, 0) or UDim2.new(1, -50, 1, 0)
+    Label.Position = IS_MOBILE and UDim2.new(0, 40, 0, 0) or UDim2.new(0, 50, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = name
+    Label.TextColor3 = isActive and THEME.Text or THEME.TextDim
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextSize = IS_MOBILE and 12 or 14
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    Tab.MouseButton1Click:Connect(function()
+        -- Hide all pages
+        for _, p in pairs(PageContainer:GetChildren()) do
+            if p:IsA("Frame") then p.Visible = false end
+        end
+        
+        -- Update all tabs
+        for _, t in pairs(TabContainer:GetChildren()) do
+            if t:IsA("TextButton") then
+                t.BackgroundColor3 = THEME.Card
+                if t:FindFirstChild("Indicator") then
+                    t.Indicator.Visible = false
+                end
+                for _, child in pairs(t:GetChildren()) do
+                    if child:IsA("TextLabel") then
+                        child.TextColor3 = THEME.TextDim
+                    end
+                end
+            end
+        end
+        
+        -- Activate clicked tab
+        Tab.BackgroundColor3 = THEME.Primary
+        if Tab:FindFirstChild("Indicator") then
+            Tab.Indicator.Visible = true
+        end
+        Icon.TextColor3 = THEME.Text
+        Label.TextColor3 = THEME.Text
+        page.Visible = true
+        CurrentTab = name
+    end)
+end
+
+CreateTab("Teleports", "📍", Page_Teleports)
+CreateTab("Extras", "⚙️", Page_Extras)
+CreateTab("Filters", "🔧", Page_Filters)
+
+-- // FILTER BUTTONS //
+local rarityColors = {
+    Common = Color3.fromRGB(156, 163, 175),
+    Rare = Color3.fromRGB(59, 130, 246),
+    Epic = Color3.fromRGB(168, 85, 247),
+    Legendary = Color3.fromRGB(234, 179, 8),
+    Mythic = Color3.fromRGB(249, 115, 22),
+    Godly = Color3.fromRGB(239, 68, 68),
+    Celestial = Color3.fromRGB(96, 165, 250),
+    Secret = Color3.fromRGB(147, 51, 234)
+}
 
 for _, rarity in ipairs({"Common", "Rare", "Epic", "Legendary", "Mythic", "Godly", "Celestial", "Secret"}) do
-    local b = Instance.new("TextButton", FilterContainer); b.Size, b.BackgroundColor3, b.Text, b.TextColor3, b.Font, b.TextSize = UDim2.new(0.85,0,0,30), THEME.Background, rarity, THEME.Text, "GothamBold", 12; Instance.new("UICorner", b)
-    local s = Instance.new("UIStroke", b); s.Thickness, s.Color = 2, ActiveFilters[rarity] and THEME.Success or THEME.RedDark
-    b.MouseButton1Click:Connect(function() ActiveFilters[rarity] = not ActiveFilters[rarity]; s.Color = ActiveFilters[rarity] and THEME.Success or THEME.RedDark; Refresh() end)
+    local FilterBtn = Instance.new("TextButton", FiltersScroll)
+    FilterBtn.Size = UDim2.new(1, 0, 0, IS_MOBILE and 50 or 55)
+    FilterBtn.BackgroundColor3 = ActiveFilters[rarity] and THEME.Card or THEME.Background
+    FilterBtn.Text = ""
+    FilterBtn.BorderSizePixel = 0
+    CreateCorner(FilterBtn, 8)
+    local stroke = CreateStroke(FilterBtn, ActiveFilters[rarity] and rarityColors[rarity] or THEME.Border, 2)
+    
+    local ColorIndicator = Instance.new("Frame", FilterBtn)
+    ColorIndicator.Size = UDim2.new(0, 6, 0.6, 0)
+    ColorIndicator.Position = UDim2.new(0, 0, 0.2, 0)
+    ColorIndicator.BackgroundColor3 = rarityColors[rarity]
+    ColorIndicator.BorderSizePixel = 0
+    CreateCorner(ColorIndicator, 3)
+    
+    local Label = Instance.new("TextLabel", FilterBtn)
+    Label.Size = UDim2.new(1, -70, 1, 0)
+    Label.Position = UDim2.new(0, 20, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = rarity
+    Label.TextColor3 = THEME.Text
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextSize = IS_MOBILE and 14 or 16
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local Status = Instance.new("TextLabel", FilterBtn)
+    Status.Name = "Status"
+    Status.Size = UDim2.new(0, 50, 1, 0)
+    Status.Position = UDim2.new(1, -60, 0, 0)
+    Status.BackgroundTransparency = 1
+    Status.Text = ActiveFilters[rarity] and "ON" or "OFF"
+    Status.TextColor3 = ActiveFilters[rarity] and THEME.Success or THEME.TextDim
+    Status.Font = Enum.Font.GothamBold
+    Status.TextSize = IS_MOBILE and 12 or 14
+    
+    FilterBtn.MouseButton1Click:Connect(function()
+        ActiveFilters[rarity] = not ActiveFilters[rarity]
+        FilterBtn.BackgroundColor3 = ActiveFilters[rarity] and THEME.Card or THEME.Background
+        stroke.Color = ActiveFilters[rarity] and rarityColors[rarity] or THEME.Border
+        Status.Text = ActiveFilters[rarity] and "ON" or "OFF"
+        Status.TextColor3 = ActiveFilters[rarity] and THEME.Success or THEME.TextDim
+        Refresh()
+    end)
 end
 
--- // LOGIN & LIVE UPDATES //
-LoginBtn.MouseButton1Click:Connect(function()
-    local success, response = pcall(function() return game:HttpGet(RAW_URL .. "?nocache=" .. tick()) end)
+FiltersScroll.CanvasSize = UDim2.new(0, 0, 0, FiltersLayout.AbsoluteContentSize.Y + 10)
+
+-- // LOGIN LOGIC //
+VerifyBtn.MouseButton1Click:Connect(function()
+    VerifyBtn.Text = "VERIFYING..."
+    VerifyBtn.TextColor3 = THEME.TextDim
+    
+    local success, response = pcall(function() 
+        return game:HttpGet(RAW_URL .. "?nocache=" .. tick()) 
+    end)
+    
     if success then
         local data = HttpService:JSONDecode(response)
         local key = KeyInput.Text:gsub("%s+", "")
         local found = false
-        for _, k in pairs(data.keys) do if k == key then found = true end end
+        
+        for _, k in pairs(data.keys) do 
+            if k == key then found = true end 
+        end
+        
         if found and key:find(LocalPlayer.Name) then
-            TweenService:Create(LoginContainer, TweenInfo.new(0.4), {Position = UDim2.new(-1.1,0,0,40)}):Play()
+            VerifyBtn.Text = "✓ VERIFIED"
+            VerifyBtn.BackgroundColor3 = THEME.Success
+            
+            task.wait(0.5)
+            
+            TweenService:Create(LoginContainer, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {
+                Position = UDim2.new(0, 0, -1, 0)
+            }):Play()
+            
             Content.Visible = true
-            TweenService:Create(Content, TweenInfo.new(0.4), {Position = UDim2.new(0,0,0,40)}):Play()
+            Content.Position = UDim2.new(0, 0, 1, 60)
+            TweenService:Create(Content, TweenInfo.new(0.4, Enum.EasingStyle.Quint), {
+                Position = UDim2.new(0, 0, 0, 60)
+            }):Play()
+            
+            task.wait(0.5)
             Refresh()
             
             local brainFolder = workspace:WaitForChild("GameFolder"):WaitForChild("Brainrots")
-            brainFolder.DescendantAdded:Connect(function() Refresh() end)
-            brainFolder.DescendantRemoving:Connect(function() Refresh() end)
+            brainFolder.DescendantAdded:Connect(function() task.wait(0.1) Refresh() end)
+            brainFolder.DescendantRemoving:Connect(function() task.wait(0.1) Refresh() end)
+        else
+            VerifyBtn.Text = "✗ INVALID KEY"
+            VerifyBtn.BackgroundColor3 = THEME.Error
+            task.wait(2)
+            VerifyBtn.Text = "VERIFY KEY"
+            VerifyBtn.BackgroundColor3 = THEME.Primary
+            VerifyBtn.TextColor3 = THEME.Text
         end
+    else
+        VerifyBtn.Text = "✗ ERROR"
+        VerifyBtn.BackgroundColor3 = THEME.Error
+        task.wait(2)
+        VerifyBtn.Text = "VERIFY KEY"
+        VerifyBtn.BackgroundColor3 = THEME.Primary
+        VerifyBtn.TextColor3 = THEME.Text
     end
 end)
 
-SearchBar:GetPropertyChangedSignal("Text"):Connect(function() SearchText = SearchBar.Text; Refresh() end)
+SearchBar:GetPropertyChangedSignal("Text"):Connect(function() 
+    SearchText = SearchBar.Text
+    Refresh()
+end)
